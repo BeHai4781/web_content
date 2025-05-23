@@ -3,38 +3,40 @@ body {
     font-family: 'Merriweather', Georgia, serif;
     margin: 0;
     padding: 0;
-    background-color: #f0f8ff;
+    background-color: #f8f3ff; 
     color: #333;
     line-height: 1.6;
 }
+
 .banner img {
     width: 100%;
     height: auto;
     display: block;
 }
+
 .navbar {
-    background-color: #cceeff;
+    background-color: #6f42c1; 
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .navbar .nav-link {
-    color: #004466;
+    color: #ffffff;
     font-weight: 500;
     transition: color 0.3s ease;
 }
 
 .navbar .nav-link:hover {
-    color: #006699;
+    color: #dcd0ff;
 }
 
 h3, h4 {
-    color: #006699;
-    margin-top: 30px;
+    color: #5a32a3;
+    margin-top: 10px;
     font-weight: bold;
 }
 
 .card {
-    border: 1px solid #cceeff;
+    border: 1px solid #d5bfff;
     transition: box-shadow 0.3s ease;
 }
 
@@ -43,32 +45,35 @@ h3, h4 {
 }
 
 .card-title {
-    color: #004466;
+    color: #5a32a3;
 }
 
 .btn-primary {
-    background-color: #3399ff;
-    border-color: #3399ff;
+    background-color: #7b4fc9;
+    border-color: #7b4fc9;
+    color: #fff;
 }
 
 .btn-primary:hover {
-    background-color: #007acc;
-    border-color: #007acc;
+    background-color: #5e3aa6;
+    border-color: #5e3aa6;
 }
 
 .btn-secondary {
-    background-color: #66ccff;
-    border-color: #66ccff;
+    background-color: #a98edf;
+    border-color: #a98edf;
+    color: #fff;
 }
 
 .btn-secondary:hover {
-    background-color: #33b5e5;
-    border-color: #33b5e5;
+    background-color: #9272d1;
+    border-color: #9272d1;
 }
 
 .btn-success {
     background-color: #44bb77;
     border-color: #44bb77;
+    color: #fff;
 }
 
 .btn-success:hover {
@@ -76,30 +81,26 @@ h3, h4 {
     border-color: #369d60;
 }
 
-form select, form textarea {
-    border: 1px solid #99ddee;
+form select,
+form textarea {
+    border: 1px solid #c8afff;
     border-radius: 4px;
     padding: 8px;
     width: 100%;
     transition: border-color 0.3s ease;
 }
 
-form select:focus, form textarea:focus {
-    border-color: #3399ff;
+form select:focus,
+form textarea:focus {
+    border-color: #7b4fc9;
     outline: none;
 }
 
 footer {
-    background-color: #cceeff;
-    padding: 30px;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    color: #004466;
-}
-
-footer h3 {
-    color: #003344;
+    background-color: #ffbbff;
+    color: #ffffff;
+    padding: 40px 20px;
+    margin-top: 30px;
 }
 
 footer ul {
@@ -108,11 +109,32 @@ footer ul {
 }
 
 footer ul li {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+footer ul li a {
+    color: #f3eaff;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+footer ul li a:hover {
+    color: #dcd0ff;
+}
+
+footer p {
+    margin: 5px 0;
+    color: #f3eaff;
+}
+
+footer hr {
+    border-top: 1px solid #a98edf;
 }
 
 @media (max-width: 768px) {
-    footer {
-        flex-direction: column;
+    footer footer-col {
+        margin-bottom: 30px;
+        text-align: center;
     }
 }
+

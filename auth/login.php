@@ -8,7 +8,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $role = $_POST['role'];
 
     $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? AND role = ? AND status = 'active'");
-    // $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? AND status = 'active'");
     $stmt->execute([$username, $role]);
     $user = $stmt->fetch();
 
