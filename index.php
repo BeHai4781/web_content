@@ -6,7 +6,7 @@ $popularPosts = $pdo->query("SELECT * FROM posts WHERE status='approved' ORDER B
 include 'includes/header.php';
 ?>
 
-<div class="container mt-4">
+<div class="container">
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Trang chính</a>

@@ -1,9 +1,8 @@
-
 body {
     font-family: 'Merriweather', Georgia, serif;
     margin: 0;
     padding: 0;
-    background-color: #f8f3ff; 
+    background-color: #f8f3ff;
     color: #333;
     line-height: 1.6;
 }
@@ -14,13 +13,14 @@ body {
     display: block;
 }
 
+/* Navbar */
 .navbar {
-    background-color: #6f42c1; 
+    background-color: #6f42c1;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .navbar .nav-link {
-    color: #ffffff;
+    color: #fff;
     font-weight: 500;
     transition: color 0.3s ease;
 }
@@ -29,12 +29,131 @@ body {
     color: #dcd0ff;
 }
 
+/* Custom Navbar */
+.custom-navbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #d2b3db;
+    padding: 10px 20px;
+    color: #fff;
+}
+
+.custom-navbar > * {
+    margin: 5px 10px;
+}
+
+.custom-navbar .nav-item a,
+.custom-navbar .nav-cta a {
+    color: #0b1957;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.custom-navbar .nav-item a:hover,
+.custom-navbar .nav-cta a:hover {
+    text-decoration: underline;
+}
+
+/* Search */
+.custom-navbar .nav-search {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    flex-grow: 1;
+}
+
+.nav-search input,
+.custom-navbar .nav-search input {
+    padding: 6px;
+    width: 200px;
+    border-radius: 4px;
+    border: 1px solid #0b1957;
+    background-color: transparent;
+    font-size: 14px;
+    color: #0b1957;
+    outline: none;
+}
+
+.search-input::placeholder {
+    color: #ccc;
+}
+
+.nav-search button {
+    padding: 6px 12px;
+    border: none;
+    background-color: #fff;
+    color: #4b0082;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.nav-search button:hover {
+    background-color: #eee;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .custom-navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .custom-navbar .nav-search {
+        justify-content: flex-start;
+        width: 100%;
+    }
+
+    .custom-navbar .nav-search input {
+        width: 100%;
+    }
+
+    footer .footer-col {
+        margin-bottom: 30px;
+        text-align: center;
+    }
+}
+
+/* Dropdown */
+.nav-item.dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    color: #000;
+    list-style: none;
+    margin-top: 5px;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.dropdown-menu li {
+    margin: 5px 0;
+}
+
+.dropdown-menu li a {
+    text-decoration: none;
+    color: #4b0082;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+/* Typography */
 h3, h4 {
     color: #5a32a3;
     margin-top: 10px;
     font-weight: bold;
 }
 
+/* Cards */
 .card {
     border: 1px solid #d5bfff;
     transition: box-shadow 0.3s ease;
@@ -48,14 +167,21 @@ h3, h4 {
     color: #5a32a3;
 }
 
+/* Buttons */
+.btn {
+    color: #4b0082;
+    font-weight: bold;
+    text-decoration: none;
+}
+
 .btn-primary {
-    background-color: #7b4fc9;
+    background-color: #f7f4ed;
     border-color: #7b4fc9;
     color: #fff;
 }
 
 .btn-primary:hover {
-    background-color: #5e3aa6;
+    background-color: #a42ca9;
     border-color: #5e3aa6;
 }
 
@@ -81,6 +207,7 @@ h3, h4 {
     border-color: #369d60;
 }
 
+/* Forms */
 form select,
 form textarea {
     border: 1px solid #c8afff;
@@ -96,9 +223,10 @@ form textarea:focus {
     outline: none;
 }
 
+/* Footer */
 footer {
-    background-color: #ffbbff;
-    color: #ffffff;
+    background-color: #d2b3db;
+    color: #fff;
     padding: 40px 20px;
     margin-top: 30px;
 }
@@ -113,7 +241,7 @@ footer ul li {
 }
 
 footer ul li a {
-    color: #f3eaff;
+    color: #0b1957;
     text-decoration: none;
     transition: color 0.3s;
 }
@@ -124,17 +252,9 @@ footer ul li a:hover {
 
 footer p {
     margin: 5px 0;
-    color: #f3eaff;
+    color: #0b1957;
 }
 
 footer hr {
     border-top: 1px solid #a98edf;
 }
-
-@media (max-width: 768px) {
-    footer footer-col {
-        margin-bottom: 30px;
-        text-align: center;
-    }
-}
-

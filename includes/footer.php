@@ -31,7 +31,7 @@
 
         <hr>
 
-        <div class="text-center mt-3">
+        <div class="text-center mt-3 color: #0b1957">
             <p>© 2025 HHC News. All rights reserved.</p>
         </div>
     </div>
