@@ -2,9 +2,31 @@ body {
     font-family: 'Merriweather', Georgia, serif;
     margin: 0;
     padding: 0;
-    background-color: #f8f3ff;
+    font-size: 16px;  
+    background-color: white;
     color: #333;
     line-height: 1.6;
+}
+/* Typography */
+h1 {
+    font-size: 24px;
+}
+
+h2 {
+    font-size: 20px;
+}
+
+h3, h4 {
+    color: #5a32a3;
+    margin-top: 10px;
+    font-weight: bold;
+}
+.meta {
+    font-size: 14px;
+}
+
+.content {
+    font-size: 16px;
 }
 
 .banner img {
@@ -35,9 +57,11 @@ body {
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    background-color: #d2b3db;
+    background-color: #ecb2ee;
     padding: 10px 20px;
-    color: #fff;
+    color: white;
+    width: 100vw;
+    margin: 0;
 }
 
 .custom-navbar > * {
@@ -45,15 +69,33 @@ body {
 }
 
 .custom-navbar .nav-item a,
-.custom-navbar .nav-cta a {
-    color: #0b1957;
+.custom-navbar {
+    color: white;
     text-decoration: none;
     font-weight: bold;
 }
 
 .custom-navbar .nav-item a:hover,
-.custom-navbar .nav-cta a:hover {
-    text-decoration: underline;
+.custom-navbar {
+    color: #d20077;
+}
+
+/* CTA Buttons */
+.nav-cta a {
+    background-color: white;
+    color: #d20077;
+    border: 2px solid white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    margin-left: 5px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.nav-cta a:hover {
+    background-color: #d20077;
+    color: white;
+    border-color: #d20077;
 }
 
 /* Search */
@@ -70,9 +112,9 @@ body {
     width: 200px;
     border-radius: 4px;
     border: 1px solid #0b1957;
-    background-color: transparent;
+    background-color: white;
     font-size: 14px;
-    color: #0b1957;
+    color: #000000;
     outline: none;
 }
 
@@ -80,7 +122,7 @@ body {
     color: #ccc;
 }
 
-.nav-search button {
+/* .nav-search button {
     padding: 6px 12px;
     border: none;
     background-color: #fff;
@@ -92,7 +134,7 @@ body {
 
 .nav-search button:hover {
     background-color: #eee;
-}
+} */
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -144,13 +186,6 @@ body {
 
 .dropdown-menu.show {
     display: block;
-}
-
-/* Typography */
-h3, h4 {
-    color: #5a32a3;
-    margin-top: 10px;
-    font-weight: bold;
 }
 
 /* Cards */
@@ -222,10 +257,20 @@ form textarea:focus {
     border-color: #7b4fc9;
     outline: none;
 }
+/* Layout Wrapper */
+html, body {
+    height: 100%;
+}
 
+.main-wrapper {
+    min-height: calc(100vh - 200px); /* trừ chiều cao ước lượng của header + footer */
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
 /* Footer */
 footer {
-    background-color: #d2b3db;
+    background-color: #ecb2ee;
     color: #fff;
     padding: 40px 20px;
     margin-top: 30px;
@@ -257,4 +302,58 @@ footer p {
 
 footer hr {
     border-top: 1px solid #a98edf;
+}
+/*Table*/
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    overflow: hidden;
+    width: 100%;
+    background-color: #fff;
+}
+
+th, td {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f0e6ff;
+    color: #4b0082;
+    font-weight: bold;
+}
+/*Phan trang*/
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.pagination a {
+    display: inline-block;
+    padding: 8px 12px;
+    margin: 0 2px;
+    background-color: #eee;
+    color: #4b0082;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.pagination a:hover {
+    background-color: #d2b3db;
+    color: #fff;
+}
+
+.pagination a.active {
+    background-color: #6f42c1;
+    color: #fff;
+    pointer-events: none;
 }

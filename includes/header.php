@@ -3,7 +3,7 @@ require_once __DIR__ . '/../config/db.php';
 
 $query = "SELECT id, name FROM categories";
 $stmt = $pdo->query($query);
-$categories = $stmt->fetchAll(); // Lấy toàn bộ danh mục
+$categories = $stmt->fetchAll();
 ?>
 
 <!DOCTYPE html><html lang="vi">
@@ -36,7 +36,7 @@ $categories = $stmt->fetchAll(); // Lấy toàn bộ danh mục
         </div>
 
         <div class="nav-cta">
-            <a href="/auth/register.php" class="btn btn-primary">Đăng ký</a> <a> / </a>
+            <a href="/auth/register.php" class="btn btn-primary">Đăng ký</a>
             <a href="/auth/login.php" class="btn">Đăng nhập</a>
         </div>
     </nav>
