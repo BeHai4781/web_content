@@ -3,11 +3,11 @@
     <div class="container">
         <div class="row">
             <div class="footer-col col-md-4">
-                <h4>HHC News</h4>
+                <h4>PNT</h4>
                 <ul>
                     <li><a href="#">Về chúng tôi</a></li>
-                    <li><a href="#">HHC News là gì</a></li>
-                    <li><a href="#">Blog trên HHC News</a></li>
+                    <li><a href="#">PNT là gì</a></li>
+                    <li><a href="#">Blog trên PNT</a></li>
                 </ul>
             </div>
 
@@ -36,4 +36,5 @@
         </div>
     </div>
 </footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body></html>

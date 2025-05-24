@@ -2,21 +2,31 @@
 require '../config/db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $fullname = isset($_POST['fullname']) ? trim($_POST['fullname']) : '';
-    $username = isset($_POST['username']) ? trim($_POST['username']) : '';
+    $fullname = trim($_POST['fullname'] ?? '');
+    $username = trim($_POST['username'] ?? '');
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $email = isset($_POST['email']) ? trim($_POST['email']) : '';
-    $phone = isset($_POST['phone']) ? trim($_POST['phone']) : '';
+    $email = trim($_POST['email'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
 
-    // Chèn user với trạng thái "pending"
     $stmt = $pdo->prepare("INSERT INTO users (fullname, username, password, email, phone, status, role)
                            VALUES (?, ?, ?, ?, ?, 'pending', 'user')");
     $stmt->execute([$fullname, $username, $password, $email, $phone]);
 
+    $user_id = $pdo->lastInsertId();
+
+    // Chỉ thêm thông báo nếu chưa tồn tại
+    $check = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE type = 'approval_request' AND user_id = ?");
+    $check->execute([$user_id]);
+
+    if ($check->fetchColumn() == 0) {
+        $stmt = $pdo->prepare("INSERT INTO notifications (type, user_id, is_read, created_at)
+                               VALUES ('approval_request', ?, 0, NOW())");
+        $stmt->execute([$user_id]);
+    }
+
     echo "Đăng ký thành công. Vui lòng chờ admin duyệt tài khoản.";
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>

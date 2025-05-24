@@ -40,49 +40,59 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action'], $_POST['use
     if ($user) {
         if ($action === 'approve') {
             $pdo->prepare("UPDATE users SET status = 'active' WHERE id = ?")->execute([$user_id]);
+            $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ? AND type = 'approval_request'")->execute([$user_id]);
+
             $mailResult = sendEmail($user['email'], $user['fullname'], 'approved');
             $message = $mailResult ? "✅ Tài khoản đã được duyệt và email đã gửi." : "⚠️ Duyệt thành công nhưng không gửi được email.";
         } elseif ($action === 'reject') {
             $pdo->prepare("UPDATE users SET status = 'rejected' WHERE id = ?")->execute([$user_id]);
+            $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ? AND type = 'approval_request'")->execute([$user_id]);
+
             $mailResult = sendEmail($user['email'], $user['fullname'], 'rejected');
             $message = $mailResult ? "❌ Đã từ chối và gửi email." : "⚠️ Đã từ chối nhưng không gửi được email.";
         }
-    } else {
-        $message = "❌ Không tìm thấy tài khoản đang chờ duyệt.";
     }
 }
 
-$duyet_mode = isset($_GET['duyet']) && $_GET['duyet'] === 'true';
+$duyet_mode = isset($_GET['duyet']) ? $_GET['duyet'] === 'false' : true;
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $offset = ($page - 1) * $limit;
 
-if ($duyet_mode) {
+if ($duyet_mode == 'false') {
     // Danh sách chờ duyệt
     $total_stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE status = 'pending'");
     $total_users = $total_stmt->fetchColumn();
 
+    $start = 0;
+    $limit = 10;
     $stmt = $pdo->prepare("SELECT * FROM users WHERE status = 'pending' ORDER BY id DESC LIMIT ?, ?");
+    $stmt->bindValue(1, $start, PDO::PARAM_INT);
+    $stmt->bindValue(2, $limit, PDO::PARAM_INT);
+    $stmt->execute();
+    $pendingUsers = $stmt->fetchAll();
+    $users = $pendingUsers;
 } else {
     // Danh sách đã duyệt
     $total_stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE status = 'active'");
     $total_users = $total_stmt->fetchColumn();
 
     $stmt = $pdo->prepare("SELECT * FROM users WHERE status = 'active' ORDER BY id DESC LIMIT ?, ?");
+    $stmt->bindValue(1, $offset, PDO::PARAM_INT);
+    $stmt->bindValue(2, $limit, PDO::PARAM_INT);
+    $stmt->execute();
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-$stmt->bindValue(1, $offset, PDO::PARAM_INT);
-$stmt->bindValue(2, $limit, PDO::PARAM_INT);
-$stmt->execute();
-$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $total_pages = ceil($total_users / $limit);
 
 include '../includes/header_admin.php';
 ?>
+
 <div class="main-wrapper">
     <h2><?= $duyet_mode ? "Danh sách tài khoản chờ duyệt" : "Danh sách tài khoản hiện có" ?></h2>
     <div style="margin: 10px 0;">
-        <a href="?duyet=true" class="btn btn-secondary">📋 Danh sách chờ duyệt</a>
-        <a href="?" class="btn btn-secondary">👥 Danh sách tài khoản</a>
+        <a href="?duyet=false" class="btn btn-secondary">📋 Danh sách chờ duyệt</a>
+        <a href="?duyet=true" class="btn btn-secondary">👥 Danh sách tài khoản</a>
     </div>
     <?php if (!empty($message)): ?>
         <div class="message"><?= htmlspecialchars($message) ?></div>
@@ -96,7 +106,7 @@ include '../includes/header_admin.php';
                 <th>Email</th>
                 <th>SĐT</th>
                 <th>Tên đăng nhập</th>
-                <th></th>
+                <th>Vai trò</th>
                 <th>Thao tác</th>
             </tr>
             <?php foreach ($users as $user): ?>
@@ -106,6 +116,7 @@ include '../includes/header_admin.php';
                     <td><?= htmlspecialchars($user['email']) ?></td>
                     <td><?= htmlspecialchars($user['phone']) ?></td>
                     <td><?= htmlspecialchars($user['username']) ?></td>
+                    <td><?= htmlspecialchars($user['role']) ?></td>
                     <td>
                         <?php if ($duyet_mode): ?>
                             <form method="POST" style="display:inline-block;">
@@ -142,5 +153,12 @@ include '../includes/header_admin.php';
     <?php else: ?>
         <p>Không có tài khoản nào.</p>
     <?php endif; ?>
+
 </div>
+<div class="row mb-3">
+    <div class="col text-end">
+        <a href="#" class="btn btn-secondary">➕ Thêm tài khoản</a>
+    </div>
+</div>
+
 <?php include '../includes/footer.php'; ?>

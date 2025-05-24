@@ -8,7 +8,7 @@ $categories = $stmt->fetchAll();
 
 <!DOCTYPE html><html lang="vi">
 <head>
-    <meta charset="UTF-8"><title>Web Content PHP</title>
+    <meta charset="UTF-8"><title>Trang tin tức và blog PNT</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Merriweather&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../includes/style.css?v=<?= time(); ?>">
