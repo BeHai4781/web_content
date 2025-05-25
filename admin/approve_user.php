@@ -1,23 +1,18 @@
 <?php
 require '../config/db.php';
 require '../config/mailer.php';
+if (session_status() == PHP_SESSION_NONE) session_start();
 
 function sendEmail($to, $fullname, $type = 'approved') {
-    $mail = getMailer(); 
+    $mail = getMailer();
     $mail->CharSet = 'UTF-8';
-    $mail->isHTML(true); 
-
+    $mail->isHTML(true);
     try {
         $mail->addAddress($to, $fullname);
-
-        if ($type === 'approved') {
-            $mail->Subject = 'Tài khoản đã được duyệt';
-            $mail->Body = "<p>Chào <strong>$fullname</strong>,</p><p>Tài khoản của bạn đã được duyệt. Bây giờ bạn có thể đăng nhập và viết bài.</p>";
-        } else {
-            $mail->Subject = 'Tài khoản bị từ chối';
-            $mail->Body = "<p>Chào <strong>$fullname</strong>,</p><p>Tài khoản của bạn đã bị từ chối.</p>";
-        }
-
+        $mail->Subject = ($type === 'approved') ? 'Tài khoản đã được duyệt' : 'Tài khoản bị từ chối';
+        $mail->Body = ($type === 'approved')
+            ? "<p>Chào <strong>$fullname</strong>,</p><p>Tài khoản của bạn đã được duyệt. Bây giờ bạn có thể đăng nhập và viết bài.</p><p>Trân trọng.</p><p>Quản trị hệ thống</p>"
+            : "<p>Chào <strong>$fullname</strong>,</p><p>Tài khoản của bạn đã bị từ chối.</p><p>Lí do: không đủ điều kiện tham gia PNT group.</p><p>Trân trọng.</p><p>Quản trị hệ thống</p>";
         $mail->send();
         return true;
     } catch (Exception $e) {
@@ -27,12 +22,24 @@ function sendEmail($to, $fullname, $type = 'approved') {
 
 $message = "";
 $limit = 10;
+$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$offset = ($page - 1) * $limit;
 
-// Xử lý POST duyệt hoặc từ chối
+$search = trim($_GET['search'] ?? '');
+$search_query = "";
+$search_params = [];
+
+if ($search !== '') {
+    $search_query = " AND (fullname LIKE ? OR email LIKE ? OR phone LIKE ? OR username LIKE ?)";
+    $search_params = array_fill(0, 4, "%$search%");
+}
+
+$duyet_mode = isset($_GET['duyet']) ? $_GET['duyet'] === 'true' : false;
+
+// Xử lý POST duyệt / từ chối
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action'], $_POST['user_id'])) {
     $user_id = intval($_POST['user_id']);
     $action = $_POST['action'];
-
     $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ? AND status = 'pending'");
     $stmt->execute([$user_id]);
     $user = $stmt->fetch();
@@ -41,47 +48,70 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action'], $_POST['use
         if ($action === 'approve') {
             $pdo->prepare("UPDATE users SET status = 'active' WHERE id = ?")->execute([$user_id]);
             $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ? AND type = 'approval_request'")->execute([$user_id]);
-
             $mailResult = sendEmail($user['email'], $user['fullname'], 'approved');
             $message = $mailResult ? "✅ Tài khoản đã được duyệt và email đã gửi." : "⚠️ Duyệt thành công nhưng không gửi được email.";
         } elseif ($action === 'reject') {
             $pdo->prepare("UPDATE users SET status = 'rejected' WHERE id = ?")->execute([$user_id]);
             $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ? AND type = 'approval_request'")->execute([$user_id]);
-
             $mailResult = sendEmail($user['email'], $user['fullname'], 'rejected');
             $message = $mailResult ? "❌ Đã từ chối và gửi email." : "⚠️ Đã từ chối nhưng không gửi được email.";
         }
     }
 }
 
-$duyet_mode = isset($_GET['duyet']) ? $_GET['duyet'] === 'false' : true;
-$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$offset = ($page - 1) * $limit;
-
-if ($duyet_mode == 'false') {
-    // Danh sách chờ duyệt
-    $total_stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE status = 'pending'");
-    $total_users = $total_stmt->fetchColumn();
-
-    $start = 0;
-    $limit = 10;
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE status = 'pending' ORDER BY id DESC LIMIT ?, ?");
-    $stmt->bindValue(1, $start, PDO::PARAM_INT);
-    $stmt->bindValue(2, $limit, PDO::PARAM_INT);
-    $stmt->execute();
-    $pendingUsers = $stmt->fetchAll();
-    $users = $pendingUsers;
-} else {
-    // Danh sách đã duyệt
-    $total_stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE status = 'active'");
-    $total_users = $total_stmt->fetchColumn();
-
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE status = 'active' ORDER BY id DESC LIMIT ?, ?");
-    $stmt->bindValue(1, $offset, PDO::PARAM_INT);
-    $stmt->bindValue(2, $limit, PDO::PARAM_INT);
-    $stmt->execute();
-    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Xử lý xoá
+if (isset($_GET['action'], $_GET['id']) && $_GET['action'] === 'delete') {
+    $id = intval($_GET['id']);
+    $pdo->prepare("DELETE FROM notifications WHERE user_id = ?")->execute([$id]);
+    $pdo->prepare("DELETE FROM users WHERE id = ?")->execute([$id]);
+    header("Location: approve_user.php?duyet=true");
+    exit();
 }
+
+$status_filter = $duyet_mode ? 'active' : 'pending';
+$where_clause = "WHERE status = ? $search_query";
+$params = array_merge([$status_filter], $search_params);
+
+// Đếm tổng số user
+$count_sql = "SELECT COUNT(*) FROM users $where_clause";
+$count_stmt = $pdo->prepare($count_sql);
+$count_stmt->execute($params);
+$total_users = $count_stmt->fetchColumn();
+
+// Lấy danh sách user có phân trang
+$sql = "SELECT * FROM users $where_clause ORDER BY id DESC LIMIT :offset, :limit";
+$data_stmt = $pdo->prepare($sql);
+
+$where_clause = "WHERE status = :status";
+if ($search !== '') {
+    $where_clause .= " AND (fullname LIKE :search OR email LIKE :search OR phone LIKE :search OR username LIKE :search)";
+}
+
+$params_named = [
+    ':status' => $status_filter,
+];
+if ($search !== '') {
+    $params_named[':search'] = "%$search%";
+}
+
+$count_sql = "SELECT COUNT(*) FROM users $where_clause";
+$count_stmt = $pdo->prepare($count_sql);
+$count_stmt->execute($params_named);
+$total_users = $count_stmt->fetchColumn();
+
+$sql = "SELECT * FROM users $where_clause ORDER BY id DESC LIMIT :offset, :limit";
+$data_stmt = $pdo->prepare($sql);
+
+$data_stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+$data_stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+
+foreach ($params_named as $key => $val) {
+    // Nếu là :search thì gán kiểu string, nếu :status cũng string
+    $data_stmt->bindValue($key, $val, PDO::PARAM_STR);
+}
+
+$data_stmt->execute();
+$users = $data_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $total_pages = ceil($total_users / $limit);
 
@@ -89,76 +119,83 @@ include '../includes/header_admin.php';
 ?>
 
 <div class="main-wrapper">
-    <h2><?= $duyet_mode ? "Danh sách tài khoản chờ duyệt" : "Danh sách tài khoản hiện có" ?></h2>
-    <div style="margin: 10px 0;">
-        <a href="?duyet=false" class="btn btn-secondary">📋 Danh sách chờ duyệt</a>
-        <a href="?duyet=true" class="btn btn-secondary">👥 Danh sách tài khoản</a>
+    <h2><?= $duyet_mode ? "Danh sách tài khoản chờ duyệt" : "Danh sách tài khoản đã duyệt" ?></h2>
+
+    <form class="mb-3 d-flex justify-content-between" method="get">
+        <div class="input-group" style="width: 300px;">
+            <input type="hidden" name="duyet" value="<?= $duyet_mode ? 'true' : 'false' ?>">
+            <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" class="form-control" placeholder="Tìm theo tên, email, SĐT...">
+            <button type="submit" class="btn btn-outline-secondary">🔍</button>
+        </div>
+        <a href="create_user.php?action=add" class="btn btn-secondary">➕ Thêm tài khoản</a>
+    </form>
+
+    <div class="mb-3">
+        <a href="../admin/approve_user.php?duyet=false" class="btn btn-outline-primary">📋 Danh sách chờ duyệt</a>
+        <a href="../admin/approve_user.php?duyet=true" class="btn btn-outline-primary">👥 Danh sách đã duyệt</a>
     </div>
+
     <?php if (!empty($message)): ?>
-        <div class="message"><?= htmlspecialchars($message) ?></div>
+        <div class="alert alert-info"><?= htmlspecialchars($message) ?></div>
     <?php endif; ?>
 
     <?php if (count($users) > 0): ?>
-        <table>
-            <tr>
-                <th>STT</th>
-                <th>Họ tên</th>
-                <th>Email</th>
-                <th>SĐT</th>
-                <th>Tên đăng nhập</th>
-                <th>Vai trò</th>
-                <th>Thao tác</th>
-            </tr>
-            <?php foreach ($users as $user): ?>
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
                 <tr>
-                    <td><?= htmlspecialchars($user['id']) ?></td>
-                    <td><?= htmlspecialchars($user['fullname']) ?></td>
-                    <td><?= htmlspecialchars($user['email']) ?></td>
-                    <td><?= htmlspecialchars($user['phone']) ?></td>
-                    <td><?= htmlspecialchars($user['username']) ?></td>
-                    <td><?= htmlspecialchars($user['role']) ?></td>
-                    <td>
-                        <?php if ($duyet_mode): ?>
-                            <form method="POST" style="display:inline-block;">
-                                <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
-                                <input type="hidden" name="action" value="approve">
-                                <button type="submit" class="btn approve">Duyệt</button>
-                            </form>
-                            <form method="POST" style="display:inline-block;" onsubmit="return confirm('Bạn chắc chắn muốn từ chối?');">
-                                <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
-                                <input type="hidden" name="action" value="reject">
-                                <button type="submit" class="btn reject">Từ chối</button>
-                            </form>
-                        <?php else: ?>
-                            <a href="#" class="btn update">Cập nhật</a>
-                            <a href="#" class="btn delete" onclick="return confirm('Xóa tài khoản này?');">Xóa</a>
-                        <?php endif; ?>
-                    </td>
+                    <th>STT</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>SĐT</th>
+                    <th>Tên đăng nhập</th>
+                    <th>Vai trò</th>
+                    <th>Thao tác</th>
                 </tr>
-            <?php endforeach; ?>
+            </thead>
+            <tbody>
+                <?php foreach ($users as $user): ?>
+                    <tr>
+                        <td><?= $user['id'] ?></td>
+                        <td><?= htmlspecialchars($user['fullname']) ?></td>
+                        <td><?= htmlspecialchars($user['email']) ?></td>
+                        <td><?= htmlspecialchars($user['phone']) ?></td>
+                        <td><?= htmlspecialchars($user['username']) ?></td>
+                        <td><?= htmlspecialchars($user['role']) ?></td>
+                        <td>
+                            <?php if (!$duyet_mode): ?>
+                                <form method="POST" class="d-inline">
+                                    <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
+                                    <input type="hidden" name="action" value="approve">
+                                    <button type="submit" class="btn btn-success btn-sm">Duyệt</button>
+                                </form>
+                                <form method="POST" class="d-inline" onsubmit="return confirm('Bạn chắc chắn từ chối?');">
+                                    <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit" class="btn btn-warning btn-sm">Từ chối</button>
+                                </form>
+                            <?php else: ?>
+                                <a href="user_profile.php?action=edit&id=<?= $user['id'] ?>" class="btn btn-sm btn-info">Cập nhật</a>
+                                <a href="?action=delete&id=<?= $user['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Xóa tài khoản này?');">Xóa</a>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
         </table>
-        <div class="pagination">
-            <?php if ($page > 1): ?>
-                <a href="?<?= $duyet_mode ? 'duyet=true&' : '' ?>page=<?= $page - 1 ?>">&laquo;</a>
-            <?php endif; ?>
 
-            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                <a href="?<?= $duyet_mode ? 'duyet=true&' : '' ?>page=<?= $i ?>" <?= $i === $page ? 'class="active"' : '' ?>><?= $i ?></a>
-            <?php endfor; ?>
+        <nav>
+            <ul class="pagination">
+                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                    <li class="page-item <?= $i === $page ? 'active' : '' ?>">
+                        <a class="page-link" href="?duyet=<?= $duyet_mode ? 'true' : 'false' ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>"><?= $i ?></a>
+                    </li>
+                <?php endfor; ?>
+            </ul>
+        </nav>
 
-            <?php if ($page < $total_pages): ?>
-                <a href="?<?= $duyet_mode ? 'duyet=true&' : '' ?>page=<?= $page + 1 ?>">&raquo;</a>
-            <?php endif; ?>
-        </div>
     <?php else: ?>
         <p>Không có tài khoản nào.</p>
     <?php endif; ?>
-
-</div>
-<div class="row mb-3">
-    <div class="col text-end">
-        <a href="#" class="btn btn-secondary">➕ Thêm tài khoản</a>
-    </div>
 </div>
 
 <?php include '../includes/footer.php'; ?>

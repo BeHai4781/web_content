@@ -1,0 +1,71 @@
+<?php
+session_start();
+require '../config/db.php';
+
+if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
+    header("Location: ../auth/login.php");
+    exit;
+}
+
+$admin_id = $_SESSION['user']['id'];
+$message = "";
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $fullname = trim($_POST['fullname']);
+    $email = trim($_POST['email']);
+    $password = trim($_POST['password']);
+
+    if (!empty($password)) {
+        $hashed = password_hash($password, PASSWORD_DEFAULT);
+        $stmt = $pdo->prepare("UPDATE users SET fullname = ?, email = ?, password = ? WHERE id = ?");
+        $stmt->execute([$fullname, $email, $hashed, $admin_id]);
+    } else {
+        $stmt = $pdo->prepare("UPDATE users SET fullname = ?, email = ? WHERE id = ?");
+        $stmt->execute([$fullname, $email, $admin_id]);
+    }
+
+    $message = "✅ Cập nhật thành công!";
+}
+
+$stmt = $pdo->prepare("SELECT username, fullname, email FROM users WHERE id = ? AND role = 'admin'");
+$stmt->execute([$admin_id]);
+$admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$admin) {
+    echo "Không tìm thấy thông tin admin.";
+    exit;
+}
+
+require '../includes/header_admin.php';
+?>
+
+<div class="container mt-5">
+    <a href="../auth/login.php" class="btn btn-danger" style="float: right; margin: 15px 0 15px 0;">Đăng xuất</a>
+    <h2>Thông tin tài khoản Admin</h2>
+    
+    <?php if ($message): ?>
+        <div class="alert alert-success"><?php echo $message; ?></div>
+    <?php endif; ?>
+
+    <form method="post">
+        <div class="mb-3">
+            <label class="form-label">Tên đăng nhập:</label>
+            <input type="text" class="form-control" value="<?php echo htmlspecialchars($admin['username']); ?>" disabled>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Họ tên:</label>
+            <input type="text" name="fullname" class="form-control" value="<?php echo htmlspecialchars($admin['fullname']); ?>" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Email:</label>
+            <input type="email" name="email" class="form-control" value="<?php echo htmlspecialchars($admin['email']); ?>" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Mật khẩu mới (để trống nếu không đổi):</label>
+            <input type="password" name="password" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-secondary">Cập nhật</button>
+        <a href="../admin/index.php" class="btn btn-secondary">Quay lại</a>
+        
+    </form>
+<?php require '../includes/footer.php';

@@ -1,7 +1,9 @@
 <?php
 require '../config/db.php';
 require '../includes/header_admin.php'; 
-
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 // Thiết lập phân trang
 $limit = 10;
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;

@@ -63,9 +63,14 @@ $unread = count($notifications);
             <a href="index.php"><img src="logo.png" alt="Logo" style="height: 40px;"></a>
         </div>
 
+        <div class="nav-item">
+            <a href="../auth/login.php">Đăng xuất</a>
+        </div>
         <!-- Thông tin admin -->
         <div class="nav-cta">
-            <a href="admin_profile.php">Thông tin admin</a>
+            <a href="../admin/admin_profile.php">
+                👤 <?php echo htmlspecialchars($_SESSION['user']['username'] ?? ''); ?>
+            </a>
         </div>
     </div>
 

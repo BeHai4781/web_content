@@ -1,6 +1,8 @@
 <?php
 require '../config/db.php';
-
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 $latestPosts = $pdo->query("SELECT * FROM posts WHERE status='approved' ORDER BY created_at DESC LIMIT 5")->fetchAll();
 $popularPosts = $pdo->query("SELECT * FROM posts WHERE status='approved' ORDER BY views DESC LIMIT 5")->fetchAll();
 

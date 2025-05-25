@@ -34,6 +34,9 @@ $categories = $stmt->fetchAll();
             <i class="search-icon">&#128269;</i>
             <input type="text" class="search-input" placeholder="Tìm kiếm...">
         </div>
+        <div class="nav-item" style="text-align: left;">
+            <a href="../auth/login.php">Đăng xuất</a>
+        </div>
 
         <div class="nav-cta">
             <a href="/auth/register.php" class="btn btn-primary">Đăng ký</a>

@@ -14,13 +14,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($user && password_verify($password, $user['password'])) {
         $_SESSION['user'] = $user;
 
-        // Kiểm tra role và chuyển hướng
+        // ✅ Kiểm tra nếu là lần đầu đăng nhập
+        if ($user['is_first_login']) {
+            $_SESSION['user_id'] = $user['id']; 
+            header("Location: ../auth/change_password.php?first=1");
+            exit();
+        }
+
+        // ✅ Chuyển hướng theo vai trò
         if ($user['role'] === 'admin') {
             header("Location: ../admin/index.php");
         } elseif ($user['role'] === 'user') {
             header("Location: ../user/index.php");
         } else {
-            // Trường hợp không rõ role
             header("Location: ../index.php");
         }
         exit();
@@ -28,6 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = "Sai thông tin đăng nhập, vai trò hoặc chưa được duyệt.";
     }
 }
+
 ?>
 
 
