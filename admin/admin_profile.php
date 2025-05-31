@@ -18,16 +18,17 @@ $message = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $fullname = trim($_POST['fullname']);
+    $username = trim($_POST['username']);
     $email = trim($_POST['email']);
     $password = trim($_POST['password']);
 
     if (!empty($password)) {
         $hashed = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $pdo->prepare("UPDATE users SET fullname = ?, email = ?, password = ? WHERE id = ?");
+        $stmt = $pdo->prepare("UPDATE users SET username = ?, fullname = ?, email = ?, password = ? WHERE id = ?");
         $stmt->execute([$fullname, $email, $hashed, $admin_id]);
     } else {
-        $stmt = $pdo->prepare("UPDATE users SET fullname = ?, email = ? WHERE id = ?");
-        $stmt->execute([$fullname, $email, $admin_id]);
+        $stmt = $pdo->prepare("UPDATE users SET username = ?, fullname = ?, email = ? WHERE id = ?");
+        $stmt->execute([$username, $fullname, $email, $admin_id]);
     }
 
     $message = "✅ Cập nhật thành công!";
@@ -56,7 +57,7 @@ require '../includes/header_admin.php';
         <form method="post">
             <div class="mb-3">
                 <label class="form-label">Tên đăng nhập:</label>
-                <input type="text" class="form-control" value="<?php echo htmlspecialchars($admin['username']); ?>" disabled>
+                <input type="text" name="username" class="form-control" value="<?php echo htmlspecialchars($admin['username']); ?>" require>
             </div>
             <div class="mb-3">
                 <label class="form-label">Họ tên:</label>
