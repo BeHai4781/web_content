@@ -1,71 +1,205 @@
 <?php
+session_start();
+
+// Nếu chưa đăng nhập thì chuyển hướng
+if (!isset($_SESSION['user'])) {
+    echo "<script>alert('Bạn chưa đăng nhập!'); window.location.href = '/auth/login.php';</script>";
+    exit;
+}
+
 require '../config/db.php';
-$latestPosts = $pdo->query("SELECT * FROM posts WHERE status='approved' ORDER BY created_at DESC LIMIT 5")->fetchAll();
-$popularPosts = $pdo->query("SELECT * FROM posts WHERE status='approved' ORDER BY views DESC LIMIT 5")->fetchAll();
 
-include '../includes/header.php';
+$user_id = $_SESSION['user']['id'] ?? null;
+$category_id=$_GET['category_id'] ?? null;
+
+$search = trim($_GET['search'] ?? '');
+
+if ($category_id && $search) {
+    $stmt = $pdo->prepare("SELECT posts.*, categories.name AS category_name 
+        FROM posts 
+        JOIN categories ON posts.category_id = categories.id 
+        WHERE posts.user_id = ? 
+        AND posts.category_id = ?
+        AND (posts.title LIKE ? OR posts.keywords LIKE ?)
+        ORDER BY posts.created_at DESC");
+    $stmt->execute([$user_id, $category_id, "%$search%", "%$search%"]);
+} elseif ($category_id) {
+    $stmt = $pdo->prepare("SELECT posts.*, categories.name AS category_name 
+        FROM posts 
+        JOIN categories ON posts.category_id = categories.id 
+        WHERE posts.user_id = ? 
+        AND posts.category_id = ?
+        ORDER BY posts.created_at DESC");
+    $stmt->execute([$user_id, $category_id]);
+} elseif ($search) {
+    $stmt = $pdo->prepare("SELECT posts.*, categories.name AS category_name 
+        FROM posts 
+        JOIN categories ON posts.category_id = categories.id 
+        WHERE posts.user_id = ?
+        AND (posts.title LIKE ? OR posts.keywords LIKE ?)
+        ORDER BY posts.created_at DESC");
+    $stmt->execute([$user_id, "%$search%", "%$search%"]);
+} else {
+    $stmt = $pdo->prepare("SELECT posts.*, categories.name AS category_name 
+        FROM posts 
+        JOIN categories ON posts.category_id = categories.id 
+        WHERE posts.user_id = ? 
+        ORDER BY posts.created_at DESC");
+    $stmt->execute([$user_id]);
+}
+$posts = $stmt->fetchAll();
+
+include('header.php');
 ?>
+ 
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Trang cá nhân</title>
+  <link rel="stylesheet" href="create.css"> 
+  <link rel="stylesheet" href="../includes/style.css?v=<?= time(); ?>">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .container {
+      max-width: 1250px;
+      margin: 0 auto;
+      padding: 20px;
+      box-sizing: border-box;
+    }
 
-<div class="container mt-4">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Quản lý bài viết</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+    .post-card {
+      display: flex;
+      background-color: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      transition: box-shadow 0.3s ease;
+    }
 
-            <div class="collapse navbar-collapse" id="mainNavbar">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="#">Danh mục</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Tác giả</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Tin tức</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Hỗ trợ</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    .post-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
 
-    <h3>Bài viết mới nhất</h3>
-    <?php foreach ($latestPosts as $post): ?>
-        <div class="card mb-2">
-            <div class="card-body">
-                <h5 class="card-title"><?= htmlspecialchars($post['title']) ?></h5>
-                <a href="post.php?id=<?= $post['id'] ?>" class="btn btn-primary btn-sm">Xem chi tiết</a>
-            </div>
-        </div>
-    <?php endforeach; ?>
+    .thumbnail {
+      flex: 0 0 150px;
+      height: 100px;
+      margin-right: 20px;
+    }
 
-    <h3 class="mt-4">Bài viết được quan tâm nhiều nhất</h3>
-    <?php foreach ($popularPosts as $post): ?>
-        <div class="card mb-2">
-            <div class="card-body">
-                <h5 class="card-title"><?= htmlspecialchars($post['title']) ?></h5>
-                <a href="post.php?id=<?= $post['id'] ?>" class="btn btn-secondary btn-sm">Xem chi tiết</a>
-            </div>
-        </div>
-    <?php endforeach; ?>
+    .thumbnail img {
+      width: 150px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
 
-    <div class="mt-5">
-        <h4>Đánh giá trang</h4>
-        <form method="post" action="submit_rating.php">
-            <div class="mb-3">
-                <label for="rating" class="form-label">Chọn mức đánh giá:</label>
-                <select class="form-select" id="rating" name="rating">
-                    <option value="5">Rất hài lòng (5 sao)</option>
-                    <option value="4">Hài lòng (4 sao)</option>
-                    <option value="3">Bình thường (3 sao)</option>
-                    <option value="2">Chưa tốt (2 sao)</option>
-                    <option value="1">Tệ (1 sao)</option>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="comment" class="form-label">Ý kiến của bạn:</label>
-                <textarea class="form-control" id="comment" name="comment" rows="3"></textarea>
-            </div>
-            <button type="submit" class="btn btn-success">Gửi đánh giá</button>
-        </form>
-    </div>
+    .post-content {
+      flex-grow: 1;
+    }
 
-</div>
+    .post-content h3 {
+      margin-top: 0;
+      font-size: 20px;
+    }
 
-<?php include '../includes/footer.php'; ?>
+    .post-content h3 a {
+      color:#000000;
+      text-decoration: none;
+    }
+
+    .post-content h3 a:hover {
+      color: #0056b3;
+    }
+
+    .post-content p {
+      margin: 8px 0 12px;
+      color: #333;
+      font-size: 13px;
+    }
+    .post-content small {
+      font-size: 13px;
+    }
+
+    .post-actions {
+      margin-top: 10px;
+    }
+
+    .post-actions .btn {
+      padding: 6px 12px;
+      border-radius: 4px;
+      margin-right: 8px;
+    }
+
+    .add-post {
+      flex-shrink: 0;
+      width: 150px;
+      display: inline-block;
+      margin: 20px 0;
+      padding: 8px 14px;
+      font-size: 13px;
+      background-color: #0091ae;
+      color: white;
+      text-decoration: none;
+      border-radius: 25px;
+      box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+      transition: all 0.2s ease-in-out;
+    }
+
+    .add-post:hover {
+      background-color: #1c627c;
+      box-shadow: 0 4px 10px rgba(0, 86, 179, 0.4);
+    }
+
+    .btn {
+      transition: all 0.2s ease-in-out;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      font-size: 13px;
+    }
+
+    .btn:hover {
+      transform: scale(1.02);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+      <a href="create.php" class="add-post">Thêm bài viết mới</a>
+      <h2>Bài viết của tôi<?= $category_id ? ' - ' . htmlspecialchars($posts[0]['category_name'] ?? '') : '' ?></h2>
+      <?php if (count($posts) === 0): ?>
+          <p>Không có bài viết nào.</p>
+      <?php else: ?>
+          <div class="list-group">
+              <?php foreach ($posts as $post): ?>
+                  <div class="post-card">
+                    <div class="thumbnail">
+                      <?php if (!empty($post['thumbnail'])): ?>
+                        <img src="../uploads/<?= htmlspecialchars($post['thumbnail']) ?>" alt="Thumbnail">
+                      <?php else: ?>
+                        <img src="../uploads/default.jpg" alt="No Thumbnail">
+                      <?php endif; ?>
+                    </div>
+                    <div class="post-content">
+                      <h3><a href="/post.php?slug=<?= htmlspecialchars($post['slug']) ?>" target="_blank"><?= htmlspecialchars($post['title']) ?></a></h3>
+                      <p><?= mb_substr(html_entity_decode(strip_tags($post['description'] ?? $post['content'])), 0, 150) ?>...</p>
+                      <small>Đăng ngày <?= date('d/m/Y H:i', strtotime($post['created_at'] ?? $post['updated_at'])) ?> | Danh mục: <?= htmlspecialchars($post['category_name']) ?> | Lượt xem: <?= $post['views'] ?></small>
+                      <div class="post-actions d-flex gap-2 mt-3">
+                        <a href="edit_post.php?id=<?= $post['id'] ?>" class="btn text-white" style="background-color: #007bff;">
+                          <i class="fas fa-edit me-1"></i> Chỉnh sửa
+                        </a>
+                        <a href="delete_post.php?id=<?= $post['id'] ?>" class="btn text-white" style="background-color: #ff4d4d;"
+                          onclick="return confirm('Bạn có chắc muốn xóa?')">
+                          <i class="fas fa-trash-alt me-1"></i> Xóa
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+              <?php endforeach; ?>
+          </div>
+      <?php endif; ?>
+  </div>
+</body>
+</html>
+<?php include('../includes/footer.php'); ?>

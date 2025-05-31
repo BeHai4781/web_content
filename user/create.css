@@ -1,0 +1,238 @@
+body {
+      font-family: 'Roboto';
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      max-width: 1300px;
+      margin: auto;
+    }
+
+    .editor-section {
+      display: flex;
+      gap: 20px;
+    }
+
+    .editor {
+      flex: 1;
+    }
+
+    .sidebar {
+      box-shadow: 
+      0 0 4px rgba(229, 122, 220, 0.1),
+      0 0 8px rgba(154, 45, 142, 0.2);
+      width: 300px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .form-group {
+    margin-bottom: 20px;
+    }
+
+    label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 15px;
+    }
+
+    .custom-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: none;
+    background-color: #f0f6fd;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: inset 0 0 0 1px #0091ae;
+    transition: all 0.3s ease;
+    resize: vertical; 
+    }
+
+    .custom-input:focus {
+    outline: none;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 2px #0091ae;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+
+    .form-group textarea{
+      height: 50px;
+    }
+    .descript textarea{
+      height: 150px;
+    }
+
+    .form-group {
+    max-width: 880px;
+    width: 100%;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    }
+
+    .slug-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .slug-group input, .showlink {
+      width: 100%;
+      padding: 9px 12px;
+      font-size: 16px;
+      border: 2px solid rgba(0, 0, 0, 0.2); 
+      border-radius: 8px; 
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); 
+      outline: none;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .slug-group button {
+      flex-shrink: 0;
+      width: 120px;
+      padding: 10px 16px;
+      background-color: #0091ae; 
+      color: white;
+      border: none;
+      border-radius: 6px; 
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .slug-group button:hover {
+    background-color: #1c627c; 
+    transform: scale(1.03); 
+    }
+
+    .slug-group button:active {
+      transform: scale(0.97);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      justify-content: flex-start;
+    }
+
+    .action-buttons button {
+      padding: 10px 16px;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      width: auto; 
+    }
+
+    .action-buttons button:hover {
+      transform: scale(1.03);
+    }
+
+    .action-buttons button:active {
+      transform: scale(0.97);
+    }
+    .btnsave {
+    background-color: #4CAF50; 
+    }
+
+    .btnsave:hover {
+    background-color: #388e3c;
+    }
+
+    .btndelete {
+    background-color: #f44336;
+    }
+
+    .btndelete:hover {
+    background-color: #c62828;
+    }
+
+    #slug {
+      margin-bottom: 20px; 
+    }
+
+    .sidebar select {
+      margin-bottom: 30px;
+    }
+
+.tag-container {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  background-color: #e0f0ff;
+  color: #0077cc;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.tag .remove-tag {
+  margin-left: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #cc0000;
+}
+
+.editor {
+  flex: 1;
+  background-color: white; 
+  padding: 0px;
+  border-radius: 8px;
+  box-shadow:
+    0 0 4px rgba(0, 0, 0, 0.1),
+    0 0 12px rgba(0, 0, 0, 0.2);
+}
+
+.image input[type="file"],
+.descript textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  box-shadow: inset 0 0 0 1px #185386;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #f0f6fd;
+  margin-top: 10px;
+  margin-bottom: 30px;
+}
+.image label {
+  margin-top: 10px;
+}
+
+.descript textarea:focus,
+.image input[type="file"]:focus {
+  box-shadow: 0 0 0 2px #a4c2ee;
+  outline: none;
+  background: #fff;
+}
+
+#excerpt-status {
+  color: green;
+  font-size: 13px;
+  margin-top: 5px;
+  display: block;
+}
+
+
