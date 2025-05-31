@@ -15,8 +15,8 @@ $categories = $stmt->fetchAll();
     <link rel="stylesheet" href="../includes/style.css?v=<?= time(); ?>">
 </head>
 <body>
-    <nav class="custom-navbar">
-        <div class="nav-logo"><img src="../uploads/logo 3.png"></div>
+    <div class="custom-navbar">
+        <div class="nav-logo"><img src="../uploads/logo%203.png"></div>
         <div class="nav-item"><a href="/user/index.php">Trang chủ</a></div>
 
         <div class="nav-item dropdown">
@@ -41,16 +41,19 @@ $categories = $stmt->fetchAll();
             <input type="text" id="searchInput" name="search" class="search-input" placeholder="Tìm kiếm...">
         </form>
 
-        <span class="account text me-2">
-            <i class="fas fa-user-circle" style="color: #0091ae;"></i> <?= $_SESSION['user']['username'] ?>
-        </span>
+        <div class="nav-cta">
+            <a href="../user/profile_user.php">
+                <i class="fas fa-user-circle" style="color: #0091ae;"></i> 
+                <?php echo htmlspecialchars($_SESSION['user']['username'] ?? ''); ?>
+            </a>
+        </div>
 
         <div class="nav-cta">
             <a href="/auth/logout.php" class="btn btn-primary">
                 <i class="fas fa-sign-out-alt me-1"></i> Đăng xuất
             </a>
         </div>
-    </nav>
+    </div>
 
     <script>
         function toggleDropdown(event) {
