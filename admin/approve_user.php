@@ -136,7 +136,7 @@ include '../includes/header_admin.php';
 
     <div class="mb-3">
         <a href="../admin/approve_user.php?duyet=false" class="btn btn-primary">📋 Danh sách chờ duyệt</a>
-        <a href="../admin/approve_user.php?duyet=true" class="btn btn-primary">👥 Danh sách đã duyệt</a>
+        <a href="../admin/approve_user.php?duyet=true" class="btn btn-primary">👥 Danh sách người dùng</a>
     </div>
 
     <?php if (!empty($message)): ?>
