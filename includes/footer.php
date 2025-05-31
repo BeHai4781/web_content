@@ -6,8 +6,7 @@
                 <h4>PNT</h4>
                 <ul>
                     <li><a href="#">Về chúng tôi</a></li>
-                    <li><a href="#">PNT là gì</a></li>
-                    <li><a href="#">Blog trên PNT</a></li>
+                    <li><a href="#">PNT là gì?</a></li>
                 </ul>
             </div>
 
@@ -31,8 +30,8 @@
 
         <hr>
 
-        <div class="text-center mt-3 color: #0b1957">
-            <p>© 2025 PNT group. All rights reserved.</p>
+        <div class="text-center mt-3">
+            <p>© 2025 PNT website. All rights reserved.</p>
         </div>
     </div>
 </footer>
