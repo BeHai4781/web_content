@@ -1,7 +1,11 @@
 <?php
 require '../config/db.php';
 session_start();
-
+// Nếu chưa đăng nhập thì chuyển hướng
+if (!isset($_SESSION['user'])) {
+    echo "<script>alert('Bạn chưa đăng nhập!'); window.location.href = '/auth/login.php';</script>";
+    exit;
+}
 $action = $_GET['action'] ?? null;
 $id = $_GET['id'] ?? null;
 
@@ -50,7 +54,7 @@ require '../includes/header_admin.php';
 <?php if ($action === 'edit' && $user): ?>
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
     <div class="card shadow p-4" style="width: 100%; max-width: 500px;">
-        <h4 class="mb-4 text-center">Cập nhật người dùng</h4>
+        <h1 class="mb-4 text-center">Cập nhật người dùng</h1>
         <form method="POST">
             <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
 
@@ -89,7 +93,7 @@ require '../includes/header_admin.php';
             <div class="d-flex justify-content-between">
                 <div>
                     <button type="submit" name="update" class="btn btn-secondary">Cập nhật</button>
-                    <a href="../admin/approve_user.php?duyet=true" class="btn btn-secondary ms-2">Quay lại</a>
+                    <a href="../admin/approve_user.php?duyet=true" class="btn btn-primary ms-2">Quay lại</a>
                 </div>
                 <a href="../admin/approve_user.php?action=delete&id=<?php echo $user['id']; ?>" 
                 onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng này?');" 

@@ -2,6 +2,12 @@
 session_start();
 require '../config/db.php';
 
+// Nếu chưa đăng nhập thì chuyển hướng
+if (!isset($_SESSION['user'])) {
+    echo "<script>alert('Bạn chưa đăng nhập!'); window.location.href = '/auth/login.php';</script>";
+    exit;
+}
+
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header("Location: ../auth/login.php");
     exit;
@@ -39,33 +45,35 @@ if (!$admin) {
 require '../includes/header_admin.php';
 ?>
 
-<div class="container mt-5">
-    <a href="../auth/login.php" class="btn btn-danger" style="float: right; margin: 15px 0 15px 0;">Đăng xuất</a>
-    <h2>Thông tin tài khoản Admin</h2>
-    
-    <?php if ($message): ?>
-        <div class="alert alert-success"><?php echo $message; ?></div>
-    <?php endif; ?>
-
-    <form method="post">
-        <div class="mb-3">
-            <label class="form-label">Tên đăng nhập:</label>
-            <input type="text" class="form-control" value="<?php echo htmlspecialchars($admin['username']); ?>" disabled>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Họ tên:</label>
-            <input type="text" name="fullname" class="form-control" value="<?php echo htmlspecialchars($admin['fullname']); ?>" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Email:</label>
-            <input type="email" name="email" class="form-control" value="<?php echo htmlspecialchars($admin['email']); ?>" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Mật khẩu mới (để trống nếu không đổi):</label>
-            <input type="password" name="password" class="form-control">
-        </div>
-        <button type="submit" class="btn btn-secondary">Cập nhật</button>
-        <a href="../admin/index.php" class="btn btn-secondary">Quay lại</a>
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="card shadow p-4" style="width: 100%; max-width: 500px;">
+        <h1 class="mb-4 text-center">Thông tin tài khoản Admin</h1>
         
-    </form>
+        <?php if ($message): ?>
+            <div class="alert alert-success"><?php echo $message; ?></div>
+        <?php endif; ?>
+
+        <form method="post">
+            <div class="mb-3">
+                <label class="form-label">Tên đăng nhập:</label>
+                <input type="text" class="form-control" value="<?php echo htmlspecialchars($admin['username']); ?>" disabled>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Họ tên:</label>
+                <input type="text" name="fullname" class="form-control" value="<?php echo htmlspecialchars($admin['fullname']); ?>" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email:</label>
+                <input type="email" name="email" class="form-control" value="<?php echo htmlspecialchars($admin['email']); ?>" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Mật khẩu mới (để trống nếu không đổi):</label>
+                <input type="password" name="password" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-secondary">Cập nhật</button>
+            <a href="../admin/index.php" class="btn btn-primary">Quay lại</a>
+            
+        </form>
+    </div>
+</div>
 <?php require '../includes/footer.php';

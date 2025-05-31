@@ -2,7 +2,11 @@
 require '../config/db.php';
 require '../config/mailer.php';
 if (session_status() == PHP_SESSION_NONE) session_start();
-
+// Nếu chưa đăng nhập thì chuyển hướng
+if (!isset($_SESSION['user'])) {
+    echo "<script>alert('Bạn chưa đăng nhập!'); window.location.href = '/auth/login.php';</script>";
+    exit;
+}
 function sendEmail($to, $fullname, $type = 'approved') {
     $mail = getMailer();
     $mail->CharSet = 'UTF-8';
@@ -119,7 +123,7 @@ include '../includes/header_admin.php';
 ?>
 
 <div class="main-wrapper">
-    <h2><?= $duyet_mode ? "Danh sách tài khoản chờ duyệt" : "Danh sách tài khoản đã duyệt" ?></h2>
+    <h2><?= $duyet_mode ? "Danh sách tài khoản đã duyệt" : "Danh sách tài khoản chờ duyệt" ?></h2>
 
     <form class="mb-3 d-flex justify-content-between" method="get">
         <div class="input-group" style="width: 300px;">
@@ -127,12 +131,12 @@ include '../includes/header_admin.php';
             <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" class="form-control" placeholder="Tìm theo tên, email, SĐT...">
             <button type="submit" class="btn btn-outline-secondary">🔍</button>
         </div>
-        <a href="create_user.php?action=add" class="btn btn-secondary">➕ Thêm tài khoản</a>
+        <a href="create_user.php?action=add" class="btn btn-secondary">Thêm tài khoản</a>
     </form>
 
     <div class="mb-3">
-        <a href="../admin/approve_user.php?duyet=false" class="btn btn-outline-primary">📋 Danh sách chờ duyệt</a>
-        <a href="../admin/approve_user.php?duyet=true" class="btn btn-outline-primary">👥 Danh sách đã duyệt</a>
+        <a href="../admin/approve_user.php?duyet=false" class="btn btn-primary">📋 Danh sách chờ duyệt</a>
+        <a href="../admin/approve_user.php?duyet=true" class="btn btn-primary">👥 Danh sách đã duyệt</a>
     </div>
 
     <?php if (!empty($message)): ?>
@@ -153,9 +157,12 @@ include '../includes/header_admin.php';
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($users as $user): ?>
+                <?php 
+                    $stt = ($page - 1) * $limit + 1; 
+                    foreach ($users as $user): 
+                ?>
                     <tr>
-                        <td><?= $user['id'] ?></td>
+                        <td><strong><?= $stt ?></strong></td>
                         <td><?= htmlspecialchars($user['fullname']) ?></td>
                         <td><?= htmlspecialchars($user['email']) ?></td>
                         <td><?= htmlspecialchars($user['phone']) ?></td>
@@ -166,20 +173,23 @@ include '../includes/header_admin.php';
                                 <form method="POST" class="d-inline">
                                     <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
                                     <input type="hidden" name="action" value="approve">
-                                    <button type="submit" class="btn btn-success btn-sm">Duyệt</button>
+                                    <button type="submit" class="btn btn-secondary btn-sm">Duyệt</button>
                                 </form>
                                 <form method="POST" class="d-inline" onsubmit="return confirm('Bạn chắc chắn từ chối?');">
                                     <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
                                     <input type="hidden" name="action" value="reject">
-                                    <button type="submit" class="btn btn-warning btn-sm">Từ chối</button>
+                                    <button type="submit" class="btn btn-danger btn-sm">Từ chối</button>
                                 </form>
                             <?php else: ?>
-                                <a href="user_profile.php?action=edit&id=<?= $user['id'] ?>" class="btn btn-sm btn-info">Cập nhật</a>
+                                <a href="user_profile.php?action=edit&id=<?= $user['id'] ?>" class="btn btn-sm btn-secondary btn-info">Cập nhật</a>
                                 <a href="?action=delete&id=<?= $user['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Xóa tài khoản này?');">Xóa</a>
                             <?php endif; ?>
                         </td>
                     </tr>
-                <?php endforeach; ?>
+                <?php 
+                    $stt++; 
+                    endforeach; 
+                ?>
             </tbody>
         </table>
 

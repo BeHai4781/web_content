@@ -2,7 +2,11 @@
 session_start();
 require '../config/db.php';
 require '../config/mailer.php';
-
+// Nếu chưa đăng nhập thì chuyển hướng
+if (!isset($_SESSION['user'])) {
+    echo "<script>alert('Bạn chưa đăng nhập!'); window.location.href = '/auth/login.php';</script>";
+    exit;
+}
 function sendEmailAccountCreated($to, $fullname, $username, $tempPassword) {
     $mail = getMailer(); 
     $mail->CharSet = 'UTF-8';
@@ -111,14 +115,14 @@ include '../includes/header_admin.php';
                 <div class="mb-4">
                     <label class="form-label">🔐 Vai trò</label>
                     <select name="role" class="form-select">
-                        <option value="user">Người dùng</option>
+                        <option value="user">Cộng tác viên</option>
                         <option value="admin">Quản trị viên</option>
                     </select>
                 </div>
 
                 <div class="d-flex justify-content-between">
                     <button type="submit" class="btn btn-secondary px-4">Thêm</button>
-                    <a href="../admin/approve_user.php?duyet=true" class="btn btn-secondary px-4">Quay lại</a>
+                    <a href="../admin/approve_user.php?duyet=true" class="btn btn-primary px-4">Quay lại</a>
                 </div>
             </form>
         </div>
