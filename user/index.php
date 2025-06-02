@@ -13,6 +13,26 @@ $user_id = $_SESSION['user']['id'] ?? null;
 $category_id=$_GET['category_id'] ?? null;
 
 $search = trim($_GET['search'] ?? '');
+// Xử lý yêu cầu xóa qua POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_post'])) {
+    $id = intval($_POST['delete_id']);
+
+    // Chỉ xóa nếu bài viết thuộc về người dùng hiện tại
+    $check = $pdo->prepare("SELECT id FROM posts WHERE id = ? AND user_id = ?");
+    $check->execute([$id, $user_id]);
+
+    if ($check->fetch()) {
+        $deleteStmt = $pdo->prepare("DELETE FROM posts WHERE id = ?");
+        $deleteStmt->execute([$id]);
+
+        // Tránh resubmit form sau khi xóa
+        header("Location: index.php");
+        exit;
+    } else {
+        echo "<script>alert('Bạn không có quyền xóa bài viết này.');</script>";
+    }
+}
+
 
 if ($category_id && $search) {
     $stmt = $pdo->prepare("SELECT posts.*, categories.name AS category_name 
@@ -189,10 +209,13 @@ include('header.php');
                         <a href="edit_post.php?id=<?= $post['id'] ?>" class="btn text-white" style="background-color: #007bff;">
                           <i class="fas fa-edit me-1"></i> Chỉnh sửa
                         </a>
-                        <a href="delete_post.php?id=<?= $post['id'] ?>" class="btn text-white" style="background-color: #ff4d4d;"
-                          onclick="return confirm('Bạn có chắc muốn xóa?')">
-                          <i class="fas fa-trash-alt me-1"></i> Xóa
-                        </a>
+                        <form method="post" action="index.php" style="display: inline;" onsubmit="return confirm('Bạn có chắc muốn xóa?');">
+                            <input type="hidden" name="delete_post" value="1">
+                            <input type="hidden" name="delete_id" value="<?= $post['id'] ?>">
+                            <button type="submit" class="btn text-white" style="background-color: #ff4d4d; border: none;">
+                                <i class="fas fa-trash-alt me-1"></i> Xóa
+                            </button>
+                        </form>
                       </div>
                     </div>
                   </div>
