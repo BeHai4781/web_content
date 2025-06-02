@@ -1,4 +1,5 @@
 <?php
+ob_start();
 require '../config/db.php';
 require '../config/mailer.php';
 if (session_status() == PHP_SESSION_NONE) {
@@ -22,8 +23,16 @@ if (isset($_GET['delete']) && isset($_SESSION['user']['role']) && $_SESSION['use
     $post = $stmt->fetch();
 
     if ($post) {
-        $delStmt = $pdo->prepare("DELETE FROM posts WHERE id = ?");
-        $delStmt->execute([$postId]);
+        // Giả sử $post_id là ID bài viết cần xóa
+        $delstmt = $pdo->prepare("DELETE FROM notifications WHERE post_id = ?");
+        $delstmt->execute([$postId]);
+
+        $delstmt = $pdo->prepare("DELETE FROM ratings WHERE post_id = ?");
+        $delstmt->execute([$postId]);
+
+        // Sau đó mới xóa bài viết
+        $delstmt = $pdo->prepare("DELETE FROM posts WHERE id = ?");
+        $delstmt->execute([$postId]);
 
         try {
             $mail = getMailer();
@@ -169,5 +178,5 @@ $totalPages = ceil($totalInCategory / $limit);
         </ul>
     </nav>
 </div>
-
+<?php ob_end_flush();?>
 <?php include '../includes/footer.php'; ?>
